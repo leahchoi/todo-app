@@ -18,9 +18,6 @@ class App extends Component {
             items: []
         };
     }
-    componentDidMount(){
-        this.getListData();
-    }
 
     // getListData(){
     //     const resp = axios.get(`${BASE_URL}/todos${API_KEY}`).then((resp)=> {
@@ -43,11 +40,10 @@ class App extends Component {
         this.getListData()
     }
     render(){
-        console.log('Todo list: ', this.state.items)
     return(
     <div className = "container">
         <Route exact path="/" render={(props)=> {
-            return <Home add={this.addItem.bind(this)} list = {this.state.items} {...props}/>
+            return <Home getList={this.getListData.bind(this)} add={this.addItem.bind(this)} list = {this.state.items} {...props}/>
         }}/>
     </div>
     );
