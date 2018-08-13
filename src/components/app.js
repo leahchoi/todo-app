@@ -1,25 +1,22 @@
 import 'materialize-css/dist/css/materialize.min.css';
 import React, {Component} from 'react';
+import {Route, Switch} from 'react-router-dom';
 import '../assets/css/app.css';
 import logo from '../assets/images/logo.svg';
 import TodoList from './todo_list';
+import ItemDetails from './item_details';
+import NotFound from './404';
 import AddItem from './add_item';
-import listData from '../data/todo';
+import Home from './home';
 import axios from 'axios';
-
-const BASE_URL = 'http://api.reactprototypes.com';
-const API_KEY = '?key=lfz_data_soora'
+import config from '../config';
 
 class App extends Component {
     constructor(props){
         super(props);
-
         this.state = {
             items: []
         };
-    }
-    componentDidMount(){
-        this.getListData();
     }
 
     // getListData(){
@@ -33,22 +30,33 @@ class App extends Component {
 
     // }
     async getListData(){
+        const { api: { BASE_URL, API_KEY } } = config;
+
         const resp = await axios.get(`${BASE_URL}/todos${API_KEY}`);
         this.setState({
             items: resp.data.todos
         });
     }
     async addItem(item){
-        const resp = await axios.post(`${BASE_URL}/todos${API_KEY}`, item);
-        this.getListData()
+        const {api: {BASE_URL, API_KEY}}= config;
+
+        try{
+            await axios.post(`${BASE_URL}/todos${API_KEY}`, item);
+            this.getListData()
+        }catch(err){
+            console.log('something went wrong:', err.message);
+        }
     }
     render(){
-        console.log('App state: ', this.state)
     return(
     <div className = "container">
-        <h1 className='center'>To Do List</h1> 
-        <AddItem add= {this.addItem.bind(this)}/>
-        <TodoList list={this.state.items}/>
+        <Switch>
+            <Route exact path="/" render={(props) => {
+                return <Home getList={this.getListData.bind(this)} add={this.addItem.bind(this)} list={this.state.items} {...props} />
+            }} />
+            <Route path='/item-details/:item_id' component={ItemDetails}/>
+            <Route component={NotFound}/>
+        </Switch>
     </div>
     );
 }
