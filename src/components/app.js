@@ -1,15 +1,15 @@
 import 'materialize-css/dist/css/materialize.min.css';
 import React, {Component} from 'react';
-import {Route} from 'react-router-dom';
+import {Route, Switch} from 'react-router-dom';
 import '../assets/css/app.css';
 import logo from '../assets/images/logo.svg';
 import TodoList from './todo_list';
+import ItemDetails from './item_details';
+import NotFound from './404';
 import AddItem from './add_item';
 import Home from './home';
 import axios from 'axios';
-
-const BASE_URL = 'http://api.reactprototypes.com';
-const API_KEY = '?key=lfz_data_soora'
+import config from '../config';
 
 class App extends Component {
     constructor(props){
@@ -30,21 +30,33 @@ class App extends Component {
 
     // }
     async getListData(){
+        const { api: { BASE_URL, API_KEY } } = config;
+
         const resp = await axios.get(`${BASE_URL}/todos${API_KEY}`);
         this.setState({
             items: resp.data.todos
         });
     }
     async addItem(item){
-        const resp = await axios.post(`${BASE_URL}/todos${API_KEY}`, item);
-        this.getListData()
+        const {api: {BASE_URL, API_KEY}}= config;
+
+        try{
+            await axios.post(`${BASE_URL}/todos${API_KEY}`, item);
+            this.getListData()
+        }catch(err){
+            console.log('something went wrong:', err.message);
+        }
     }
     render(){
     return(
     <div className = "container">
-        <Route exact path="/" render={(props)=> {
-            return <Home getList={this.getListData.bind(this)} add={this.addItem.bind(this)} list = {this.state.items} {...props}/>
-        }}/>
+        <Switch>
+            <Route exact path="/" render={(props) => {
+                return <Home getList={this.getListData.bind(this)} add={this.addItem.bind(this)} list={this.state.items} {...props} />
+            }} />
+            <Route path='/item-details/:item_id' component={ItemDetails}/>
+            <Route component={NotFound}/>
+        </Switch>
     </div>
     );
 }
