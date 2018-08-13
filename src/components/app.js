@@ -37,6 +37,17 @@ class App extends Component {
             items: resp.data.todos
         });
     }
+
+    async deleteItem(id){
+        const {BASE_URL, API_KEY} = config.api;
+
+        try {
+            const resp = await axios.delete(`${BASE_URL}/todos/${id + API_KEY}`);
+            console.log('delete resp: ', resp)
+        }catch(err){
+            console.log('delete error: ', err.message)
+        }
+    }
     async addItem(item){
         const {api: {BASE_URL, API_KEY}}= config;
 
@@ -51,10 +62,17 @@ class App extends Component {
     return(
     <div className = "container">
         <Switch>
-            <Route exact path="/" render={(props) => {
+            <Route 
+            exact 
+            path="/" 
+            render={(props) => {
                 return <Home getList={this.getListData.bind(this)} add={this.addItem.bind(this)} list={this.state.items} {...props} />
             }} />
-            <Route path='/item-details/:item_id' component={ItemDetails}/>
+            <Route 
+            path='/item-details/:item_id' 
+            render={routeProps => {
+                return <ItemDetails delete ={this.deleteItem.bind(this)} {...routeProps}/>
+            }}/>
             <Route component={NotFound}/>
         </Switch>
     </div>
