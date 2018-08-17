@@ -7,7 +7,7 @@ class Home extends Component {
         this.props.getList();
     }
     render(){
-        console.log('Props:', this.props)
+        console.log('Props in home.js:', this.props)
         const {add, list}= this.props;
 
         return (
